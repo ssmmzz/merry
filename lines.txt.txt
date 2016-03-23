@@ -1,0 +1,138 @@
+#include<iostream>
+#include <fstream>
+#include<cstring>
+using namespace std;
+
+struct Num{
+	int num = 1;
+	char *s = NULL;
+};
+
+Num word[16000];
+
+int Judge(char aab[])//判断单词
+{
+	bool j1 = (strlen(aab) >= 4);
+	bool j2 = (aab[0] >= 'a' && aab[0] <= 'z');
+	if (!(j1&&j2))
+		return -1;
+	else
+	for (int ns = 1; aab[ns] != '\0';)
+	{
+		if (!((aab[ns] >= 'a' && aab[ns] <= 'z') || (aab[ns] >= '0' && aab[ns] <= '9')))
+			return -1;
+		else
+			ns++;
+	}
+}
+int Sta(char aaa[], int nn)   //判断该单词是否出现过
+{
+	if (nn>0)
+	for (int i = 0; i <nn; i++)
+	{
+		if (!strcmp(aaa, word[i].s))  //出现
+		{
+			word[i].num++;      //+1
+			return -1;
+		}
+	}
+}
+void BS(Num W[],int siz) 
+{
+	int t;
+	char *m;
+	for(int i=1;i<siz;i++)
+	{
+		for(int j=0;j<siz-i;j++)
+		{
+			if(W[j].num>W[j+1].num)
+			{
+				t=W[j].num;
+				m=W[j].s;
+				W[j].num=W[j+1].num;
+				W[j].s=W[j+1].s;
+				W[j+1].num=t;
+				W[j+1].s=m;
+			}
+			if(W[j].num==W[j+1].num)
+		        {
+			if(strcmp(W[j].s,W[j+1].s)<0)
+			{
+				t=W[j].num;
+				m=W[j].s;
+				W[j].num=W[j+1].num;
+				W[j].s=W[j+1].s;
+				W[j+1].num=t;
+				W[j+1].s=m;
+			}
+			} 
+	        }
+        }
+}
+int main()
+{
+	char name[50];
+	cout << "输入读取文件名称：";
+	cin >> name;
+	int size=1200000;
+	char *sentence;
+	sentence=new char[size];
+	ifstream infile(name);   //读取
+	ofstream outfile("result1.txt");
+	if (!infile){
+		cout << "Unable to open ";
+		exit(1);
+	}
+		for(int i=0;i<size;i++)
+	{
+		infile>>noskipws>>sentence[i];
+		if(i>size-50&&sentence[i]==' ')break;
+	}
+	char *sent1=strlwr(sentence);
+	char sentence1[1200000];
+	for(int tb=0;tb<size;tb++)
+	infile>>noskipws>>sentence1[tb];
+	infile.close();
+	char *sent2=strlwr(sentence1);
+	const char *delim = " ,,“”.''‘:：!?";  //分隔符
+	char *p,*p1;
+	int n = 0,t=0;   //计数器 n  初始化
+	p = strtok(sent1, delim);   //strtovk函数根据分隔符分隔字符串
+	while (p)
+	{
+		if (Judge(p) != -1)
+		{
+			if (Sta(p, n) != -1)
+			{
+				word[n].s = p;
+				n++;
+			}
+		}
+		p = strtok(NULL, delim);
+	}
+	p1 = strtok(sent2, delim);   //strtovk函数根据分隔符分隔字符串
+	while (p1)
+	{
+		if (Judge(p1) != -1)
+		{
+			if (Sta(p1, n) != -1)
+			{
+				word[n].s = p1;
+				n++;
+			}
+		}
+		p1 = strtok(NULL, delim);
+	}
+	BS(word,n);
+	if(word[0].s==NULL)
+	outfile<<"无单词";
+	else
+	while (word[n-1].s&&n>=1)        //写入统计结果
+	{
+		outfile << word[n-1].s << "：" << word[n-1].num << '\n';
+		n--;
+	}
+	outfile.close();
+        delete []sentence;
+	cout << "~操作完成~\n";
+}
